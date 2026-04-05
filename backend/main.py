@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup
 import os
 from dotenv import load_dotenv
 from groq import Groq
+import urllib3
+
+# Disable SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 load_dotenv()
 
@@ -17,7 +21,9 @@ class URLRequest(BaseModel):
 
 def scrape_website(url):
     try:
-        response = requests.get(url)
+        # FIXED SSL ISSUE HERE
+        response = requests.get(url, verify=False, timeout=10)
+
         soup = BeautifulSoup(response.text, "html.parser")
 
         title = soup.title.string if soup.title else "No title"
@@ -43,21 +49,25 @@ def scrape_website(url):
         return {"error": str(e)}
 
 def generate_json_ld(data):
-    prompt = f"""
-    Generate JSON-LD schema for SEO.
-    Title: {data['title']}
-    Description: {data['description']}
-    Headings: {data['headings']}
+    try:
+        prompt = f"""
+        Generate JSON-LD schema for SEO.
+        Title: {data['title']}
+        Description: {data['description']}
+        Headings: {data['headings']}
 
-    Return ONLY valid JSON.
-    """
+        Return ONLY valid JSON.
+        """
 
-    response = client.chat.completions.create(
-        model="llama3-70b-8192",
-        messages=[{"role": "user", "content": prompt}]
-    )
+        response = client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"LLM Error: {str(e)}"
 
 @app.get("/")
 def home():
