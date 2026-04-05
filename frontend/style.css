@@ -1,0 +1,22 @@
+body {
+  font-family: Arial;
+  text-align: center;
+  padding: 40px;
+}
+
+input {
+  width: 300px;
+  padding: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-left: 10px;
+}
+
+pre {
+  text-align: left;
+  background: #f4f4f4;
+  padding: 20px;
+  margin-top: 20px;
+}
